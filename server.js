@@ -9,7 +9,7 @@ var db = new sqlite3.Database('scrumtastic.sqlite3', function(err) {
   if(err) console.error(err);
 });
 
-var router = new (require('./lib/route').Router);
+var router = new (require('./lib/route')).Router(db);
 
 router.get('/', function(req, res) {
   fs.readFile('public/index.html', function(err, body){
@@ -22,6 +22,14 @@ router.get('/app.js', function(req, res) {
     res.end(body);
   });
 });
+
+
+var project = require('./src/resource/project');
+router.get('/projects',function(req, res) {project.list(req, res, db)});
+router.post('/projects', function(req, res) {project.create(req, res, db)});
+router.get('/projects/:id', function(req, res) {project.read(req, res, db)});
+router.post('/projects/:id', function(req, res) {project.update(req, res, db)});
+router.get('.projects/:id/destroy', function(req, res) {project.destroy(req, res, db)});
 
 router.get('/projects', function(req, res) {
   db.all('SELECT * FROM projects', [], function(err, projects){
